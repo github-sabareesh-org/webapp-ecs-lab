@@ -1,13 +1,13 @@
 {
-    "taskDefinitionArn": "arn:aws:ecs:us-east-1:537124950511:task-definition/vproapp-act-tdef:3",
+    "taskDefinitionArn": "arn:aws:ecs:us-east-1:774305598386:task-definition/vproapp-act-tdef:1",
     "containerDefinitions": [
         {
             "name": "vproapp",
-            "image": "537124950511.dkr.ecr.us-east-1.amazonaws.com/actapp",
+            "image": "774305598386.dkr.ecr.us-east-1.amazonaws.com/actapp",
             "cpu": 0,
             "portMappings": [
                 {
-                    "name": "vproapp-8080-tcp",
+                    "name": "vproapp-8080",
                     "containerPort": 8080,
                     "hostPort": 8080,
                     "protocol": "tcp",
@@ -36,10 +36,9 @@
         }
     ],
     "family": "vproapp-act-tdef",
-    "taskRoleArn": "arn:aws:iam::537124950511:role/ecsTaskExecutionRole",
-    "executionRoleArn": "arn:aws:iam::537124950511:role/ecsTaskExecutionRole",
-    "networkMode": "awsvpc",
-    "revision": 3,
+    "executionRoleArn": "arn:aws:iam::774305598386:role/ecsTaskExecutionRole",
+    "networkMode": "bridge",
+    "revision": 1,
     "volumes": [],
     "status": "ACTIVE",
     "requiresAttributes": [
@@ -59,16 +58,10 @@
             "name": "com.amazonaws.ecs.capability.docker-remote-api.1.28"
         },
         {
-            "name": "com.amazonaws.ecs.capability.task-iam-role"
-        },
-        {
             "name": "ecs.capability.execution-role-ecr-pull"
         },
         {
             "name": "com.amazonaws.ecs.capability.docker-remote-api.1.18"
-        },
-        {
-            "name": "ecs.capability.task-eni"
         },
         {
             "name": "com.amazonaws.ecs.capability.docker-remote-api.1.29"
@@ -76,20 +69,19 @@
     ],
     "placementConstraints": [],
     "compatibilities": [
-        "EC2",
-        "FARGATE"
+        "EC2"
     ],
     "requiresCompatibilities": [
-        "FARGATE"
+        "EC2"
     ],
     "cpu": "1024",
-    "memory": "2048",
+    "memory": "1024",
     "runtimePlatform": {
         "cpuArchitecture": "X86_64",
         "operatingSystemFamily": "LINUX"
     },
-    "registeredAt": "2024-12-12T08:26:01.489Z",
-    "registeredBy": "arn:aws:iam::537124950511:root",
+    "registeredAt": "2025-02-08T15:45:09.822Z",
+    "registeredBy": "arn:aws:iam::774305598386:root",
     "enableFaultInjection": false,
     "tags": []
 }

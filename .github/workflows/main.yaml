@@ -2,6 +2,11 @@ name: ecs-sonar-workflow
 on: workflow_dispatch
 env:
     AWS_REGION: us-east-1
+    ECR_REPOSITORY: actapp
+    ECR_SERVICE: vproapp-acct-svc
+    ECS_CLUSTER: project-ecs
+    ECS_TASK_DEFINITION: aws-files/taskdeffile.json
+    CONTAINER_NAME: vproapp
 jobs:
   Testing:
     runs-on: ubuntu-latest
@@ -43,6 +48,13 @@ jobs:
         env:
             SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       #     SONAR_HOST_URL: ${{ secrets.SONAR_URL }} #OPTIONAL
+      # Add a failure condition
+      - name: Fail if Quality Gate Fails
+        run: |
+            if [[ "${{ steps.sonarqube-quality-gate-check.outputs.quality-gate-status }}" != "PASSED" ]]; then
+            echo "SonarQube Quality Gate failed. Stopping the workflow."
+            exit 1
+            fi  
   BUILD_AND_PUBLISH:
     needs: Testing
     runs-on: ubuntu-latest
@@ -67,3 +79,32 @@ jobs:
           daemon_off: false
           dockerfile: ./Dockerfile
           context: ./
+  DEPLOY:
+    needs: BUILD_AND_PUBLISH
+    runs-on: ubuntu-latest
+    steps:
+        - name: checkout code
+          uses: actions/checkout@v4
+
+        - name: Configure AWS credentials
+          uses: aws-actions/configure-aws-credentials@v1
+          with:
+            aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+            aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            aws-region: ${{env.AWS_REGION}}
+            
+        - name: Fill in the new image ID in the Amazon ECS task definition
+          id: task-def
+          uses: aws-actions/amazon-ecs-render-task-definition@v1
+          with:
+            task-definition: ${{env.ECS_TASK_DEFINITION}}
+            container-name: ${{env.CONTAINER_NAME}}
+            image: ${{ secrets.REGISTRY }}/${{env.ECR_REPOSITORY}}:${{github.run_number}}
+    
+        - name: Deploy Amazon ECS task definition
+          uses: aws-actions/amazon-ecs-deploy-task-definition@v2
+          with:
+            task-definition: ${{ steps.task-def.outputs.task-definition }}
+            service: ${{env.ECR_SERVICE}}
+            cluster: ${{env.ECS_CLUSTER}}
+            wait-for-service-stability: true    
